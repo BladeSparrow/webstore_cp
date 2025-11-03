@@ -1,0 +1,13 @@
+python -m venv svenv
+
+source svenv/Scripts/activate
+
+echo %VIRTUAL_ENV
+ 
+pip install django djangorestframework django-cors-headers
+
+python manage.py makemigrations api
+
+python manage.py migrate
+
+python manage.py runserver
