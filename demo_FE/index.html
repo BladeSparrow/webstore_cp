@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Shop — Головна</title>
+  <link rel="stylesheet" href="styles.css">
+  <meta name="description" content="Головна сторінка онлайн магазину — товари, категорії, відгуки, пошук">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <div class="logo">MyShop</div>
+      <form id="searchForm" class="search" role="search" aria-label="Пошук товарів">
+        <input id="searchInput" type="search" placeholder="Пошук товарів, брендів..." />
+        <button id="searchBtn" type="submit">🔍</button>
+      </form>
+      <nav class="header-actions">
+        <button id="ordersBtn" class="icon-btn">🧾 Замовлення</button>
+        <button id="cartBtn" class="icon-btn">🛒 Кошик <span id="cartBadge" class="badge">0</span></button>
+      </nav>
+    </div>
+    <nav class="categories">
+      <div class="container categories-inner">
+        <a href="#" data-category="all">Усі</a>
+        <a href="#" data-category="electronics">Електроніка</a>
+        <a href="#" data-category="clothing">Одяг</a>
+        <a href="#" data-category="home">Дім</a>
+        <a href="#" data-category="beauty">Краса</a>
+        <a href="#" data-category="kids">Товари для дітей</a>
+        <a href="#" data-category="sale">Акції</a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container hero-inner">
+        <div class="hero-text">
+          <h1>Ласкаво просимо в MyShop</h1>
+          <p>Зручні замовлення, швидка доставка, відгуки реальних покупців.</p>
+          <div class="hero-ctas">
+            <a class="btn" href="#products">Переглянути товари</a>
+            <a class="btn ghost" href="#categories">Категорії</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="categories" class="featured-categories container">
+      <h2>Категорії</h2>
+      <div class="category-list">
+        <div class="category-card" data-category="electronics">Електроніка</div>
+        <div class="category-card" data-category="clothing">Одяг</div>
+        <div class="category-card" data-category="home">Дім</div>
+        <div class="category-card" data-category="beauty">Краса</div>
+      </div>
+    </section>
+
+    <section id="products" class="products container">
+      <h2>Рекомендовані товари</h2>
+      <div id="productGrid" class="product-grid">
+        <article class="product" data-title="Товар 1" data-price="1299" data-category="electronics">
+          <div class="thumb">🎧</div>
+          <h3 class="title">Товар 1</h3>
+          <p class="price">₴1299</p>
+          <button class="btn small view-btn">Швидкий перегляд</button>
+        </article>
+
+        <article class="product" data-title="Товар 2" data-price="2999" data-category="clothing">
+          <div class="thumb">👟</div>
+          <h3 class="title">Товар 2</h3>
+          <p class="price">₴2999</p>
+          <button class="btn small view-btn">Швидкий перегляд</button>
+        </article>
+
+        <article class="product" data-title="Товар 3" data-price="2199" data-category="home">
+          <div class="thumb">☕</div>
+          <h3 class="title">Товар 3</h3>
+          <p class="price">₴2199</p>
+          <button class="btn small view-btn">Швидкий перегляд</button>
+        </article>
+
+        <article class="product" data-title="Товар 4" data-price="199" data-category="beauty">
+          <div class="thumb">🧴</div>
+          <h3 class="title">Товар 4</h3>
+          <p class="price">₴199</p>
+          <button class="btn small view-btn">Швидкий перегляд</button>
+        </article>
+      </div>
+    </section>
+
+    <section class="reviews container">
+      <h2>Відгуки покупців</h2>
+      <div class="review-list">
+        <blockquote class="review">«Швидка доставка, все добре упаковано — рекомендую!»<cite>— Олена</cite></blockquote>
+        <blockquote class="review">«Класні кросівки, підійшли розмір в розмір.»<cite>— Іван</cite></blockquote>
+        <blockquote class="review">«Повернення пройшло легко. Підтримка допомогла швидко.»<cite>— Марта</cite></blockquote>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div>© 2025 MyShop — Виготовлено для демо</div>
+      <div class="footer-links">
+        <a href="#">Про нас</a>
+        <a href="#">Доставка</a>
+        <a href="#">Контакти</a>
+      </div>
+    </div>
+  </footer>
+
+  <div id="modal" class="modal" aria-hidden="true">
+    <div class="modal-content">
+      <button id="modalClose" class="modal-close">✖</button>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+
+  <div id="cartModal" class="modal" aria-hidden="true">
+    <div class="modal-content">
+      <button id="cartClose" class="modal-close">✖</button>
+      <div id="cartBody"><h3>Кошик</h3><p>Кошик порожній.</p></div>
+    </div>
+  </div>
+
+  <div id="ordersModal" class="modal" aria-hidden="true">
+    <div class="modal-content">
+      <button id="ordersClose" class="modal-close">✖</button>
+      <div id="ordersBody"><h3>Мої замовлення</h3><p>Поки що немає замовлень — це демо.</p></div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
