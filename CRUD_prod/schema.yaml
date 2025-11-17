@@ -149,6 +149,148 @@ paths:
                 type: object
                 additionalProperties: {}
           description: ''
+  /cart/clear/:
+    delete:
+      operationId: cart_clear_destroy
+      description: |-
+        Повне очищення корзини.
+        DELETE /cart/clear
+        [cite: 15]
+      tags:
+      - cart
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /cart/close/:
+    delete:
+      operationId: cart_close_destroy
+      description: |-
+        Видалення (закриття) кошику по завершенню сесії.
+        DELETE /cart/close
+        [cite: 5]
+      tags:
+      - cart
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /cart/create/:
+    post:
+      operationId: cart_create_create
+      description: |-
+        Створення нового кошику для сесії.
+        POST /cart/create
+        [cite: 4]
+      tags:
+      - cart
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /cart/items/:
+    get:
+      operationId: cart_items_retrieve
+      description: |-
+        Перегляд вмісту кошика (GET)
+        Додавання товара в корзину (POST)
+        GET /cart/items?session_id=...
+        POST /cart/items
+      tags:
+      - cart
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+    post:
+      operationId: cart_items_create
+      description: |-
+        Перегляд вмісту кошика (GET)
+        Додавання товара в корзину (POST)
+        GET /cart/items?session_id=...
+        POST /cart/items
+      tags:
+      - cart
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /cart/items/{itemId}/:
+    put:
+      operationId: cart_items_update
+      description: |-
+        Оновлення кількості (PUT)
+        Видалення товару (DELETE)
+        /cart/items/{itemId}
+        [cite: 14, 15]
+      parameters:
+      - in: path
+        name: itemId
+        schema:
+          type: integer
+        required: true
+      tags:
+      - cart
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+    delete:
+      operationId: cart_items_destroy
+      description: |-
+        Оновлення кількості (PUT)
+        Видалення товару (DELETE)
+        /cart/items/{itemId}
+        [cite: 14, 15]
+      parameters:
+      - in: path
+        name: itemId
+        schema:
+          type: integer
+        required: true
+      tags:
+      - cart
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /cart/purchase/:
+    put:
+      operationId: cart_purchase_update
+      description: |-
+        Перехід к оформленню (покупка).
+        PUT /cart/purchase
+        [cite: 6]
+      tags:
+      - cart
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
   /category/:
     get:
       operationId: category_retrieve
