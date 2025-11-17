@@ -37,6 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'drf_spectacular',
+    'cart.apps.CartConfig',
 
     # My apps
     'api.apps.ApiConfig',
@@ -45,6 +47,10 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',    
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
@@ -62,7 +68,7 @@ ROOT_URLCONF = 'config.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -131,3 +137,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 CORS_ALLOW_ALL_ORIGINS = True #щоб дозволити завантаження штмлкі з будь якого джерела
+
+NOVA_POSHTA_API_KEY = "c97e3de4186c9e39a5b33aeaad192a59df815c35"
+NOVA_POSHTA_API_URL = "https://api.novaposhta.ua/v2.0/json/"
