@@ -4,8 +4,9 @@ from rest_framework import status
 from django.http import Http404
 from django.db.models import ProtectedError
 
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from .models import Category, Manufacturer, Product
-from .serializers import CategorySerializer, ManufacturerSerializer, ProductSerializer
+from .serializers import CategorySerializer, ManufacturerSerializer, ProductSerializer, UserSerializer
 
 
 def handle_protected_error(instance_name):
@@ -13,6 +14,17 @@ def handle_protected_error(instance_name):
         {"error": f"Неможливо видалити. Цей {instance_name} пов'язаний з одним або декількома товарами/замовленнями."},
         status=status.HTTP_400_BAD_REQUEST
     )
+
+
+class RegisterView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = UserSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class CategoryListCreateAPIView(APIView):

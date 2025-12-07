@@ -1,5 +1,10 @@
 from django.urls import path
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+)
 from .views import (
+    RegisterView,
     CategoryListCreateAPIView, CategoryDetailAPIView,
     ManufacturerListCreateAPIView, ManufacturerDetailAPIView,
     ProductListCreateAPIView, ProductDetailAPIView,
@@ -7,6 +12,10 @@ from .views import (
 )
 
 urlpatterns = [
+    path('auth/register/', RegisterView.as_view(), name='auth_register'),
+    path('auth/login/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('auth/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+
     path('category/', CategoryListCreateAPIView.as_view(), name='category-list-create'),
     path('category/<int:pk>/', CategoryDetailAPIView.as_view(), name='category-detail'),
 
