@@ -5,6 +5,7 @@ from rest_framework_simplejwt.views import (
 )
 from .views import (
     RegisterView,
+    CartAPIView,
     CategoryListCreateAPIView, CategoryDetailAPIView,
     ManufacturerListCreateAPIView, ManufacturerDetailAPIView,
     ProductListCreateAPIView, ProductDetailAPIView,
@@ -27,4 +28,7 @@ urlpatterns = [
 
     path('products/cat/<int:category_id>/', ProductListByCategoryAPIView.as_view(), name='product-list-by-category'),
     path('products/man/<int:manufacturer_id>/', ProductListByManufacturerAPIView.as_view(), name='product-list-by-manufacturer'),
+
+    path('cart/', CartAPIView.as_view(), name='cart-detail'),
+    path('cart/items/<int:pk>/', CartAPIView.as_view(), name='cart-item-delete'),
 ]

@@ -5,8 +5,11 @@ from django.http import Http404
 from django.db.models import ProtectedError
 
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from .models import Category, Manufacturer, Product
-from .serializers import CategorySerializer, ManufacturerSerializer, ProductSerializer, UserSerializer
+from .models import Category, Manufacturer, Product, Cart, CartItem
+from .serializers import (
+    CategorySerializer, ManufacturerSerializer, ProductSerializer, UserSerializer,
+    CartSerializer, CartItemSerializer
+)
 
 
 def handle_protected_error(instance_name):
@@ -14,6 +17,48 @@ def handle_protected_error(instance_name):
         {"error": f"Неможливо видалити. Цей {instance_name} пов'язаний з одним або декількома товарами/замовленнями."},
         status=status.HTTP_400_BAD_REQUEST
     )
+
+
+class CartAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        cart, created = Cart.objects.get_or_create(user=request.user)
+        serializer = CartSerializer(cart)
+        return Response(serializer.data)
+
+    def post(self, request):
+        cart, created = Cart.objects.get_or_create(user=request.user)
+        serializer = CartItemSerializer(data=request.data)
+        if serializer.is_valid():
+            product = serializer.validated_data['product']
+            quantity = serializer.validated_data.get('quantity', 1)
+            
+            cart_item, item_created = CartItem.objects.get_or_create(
+                cart=cart, product=product,
+                defaults={'quantity': quantity}
+            )
+            if not item_created:
+                cart_item.quantity += quantity
+                cart_item.save()
+            
+            return Response(CartSerializer(cart).data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk=None):
+        if pk:
+            try:
+                item = CartItem.objects.get(pk=pk, cart__user=request.user)
+                item.delete()
+            except CartItem.DoesNotExist:
+                return Response({"error": "Item not found"}, status=status.HTTP_404_NOT_FOUND)
+            
+            cart = Cart.objects.get(user=request.user)
+            return Response(CartSerializer(cart).data)
+        else:
+            cart = Cart.objects.get(user=request.user)
+            cart.items.all().delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class RegisterView(APIView):
