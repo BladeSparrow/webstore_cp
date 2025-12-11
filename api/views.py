@@ -48,7 +48,7 @@ class CartAPIView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk=None):
-        if pk: 
+        if pk:
             try:
                 item = CartItem.objects.get(pk=pk, cart__user=request.user)
                 item.delete()
@@ -57,7 +57,7 @@ class CartAPIView(APIView):
             
             cart = Cart.objects.get(user=request.user)
             return Response(CartSerializer(cart).data)
-        else:        
+        else:
             cart = Cart.objects.get(user=request.user)
             cart.items.all().delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
