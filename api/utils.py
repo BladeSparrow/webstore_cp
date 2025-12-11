@@ -6,10 +6,6 @@ CACHE_KEY = 'usd_uah_rate'
 CACHE_TIMEOUT = 3600  # 1 hour
 
 def get_usd_to_uah_rate():
-    """
-    Fetches the current USD to UAH exchange rate.
-    Returns the rate (float) or None if fetching fails.
-    """
     rate = cache.get(CACHE_KEY)
     if rate:
         return rate
