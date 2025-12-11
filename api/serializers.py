@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from .models import Category, Manufacturer, Product, Cart, CartItem
+from .utils import get_usd_to_uah_rate
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -13,9 +14,24 @@ class ManufacturerSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class ProductSerializer(serializers.ModelSerializer):
+    price_uah = serializers.SerializerMethodField()
+    price_usd = serializers.SerializerMethodField()
+
     class Meta:
         model = Product
         fields = '__all__'
+
+    def get_price_uah(self, obj):
+        price = obj.prices.order_by('-pdate').first()
+        return price.pprice if price else None
+
+    def get_price_usd(self, obj):
+        price_uah = self.get_price_uah(obj)
+        if price_uah:
+            rate = get_usd_to_uah_rate()
+            if rate:
+                return round(float(price_uah) / rate, 2)
+        return None
 
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)

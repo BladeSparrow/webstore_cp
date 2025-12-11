@@ -6,6 +6,7 @@ from rest_framework_simplejwt.views import (
 from .views import (
     RegisterView,
     CartAPIView,
+    CheckoutAPIView,
     CategoryListCreateAPIView, CategoryDetailAPIView,
     ManufacturerListCreateAPIView, ManufacturerDetailAPIView,
     ProductListCreateAPIView, ProductDetailAPIView,
@@ -31,4 +32,6 @@ urlpatterns = [
 
     path('cart/', CartAPIView.as_view(), name='cart-detail'),
     path('cart/items/<int:pk>/', CartAPIView.as_view(), name='cart-item-delete'),
+
+    path('checkout/', CheckoutAPIView.as_view(), name='checkout'),
 ]

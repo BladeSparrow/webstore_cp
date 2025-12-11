@@ -3,9 +3,11 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.http import Http404
 from django.db.models import ProtectedError
+from django.core.mail import send_mail
+import uuid
 
 from rest_framework.permissions import IsAuthenticated, AllowAny
-from .models import Category, Manufacturer, Product, Cart, CartItem
+from .models import Category, Manufacturer, Product, Cart, CartItem, Order, OrderProduct, Price
 from .serializers import (
     CategorySerializer, ManufacturerSerializer, ProductSerializer, UserSerializer,
     CartSerializer, CartItemSerializer
@@ -46,7 +48,7 @@ class CartAPIView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, pk=None):
-        if pk:
+        if pk: 
             try:
                 item = CartItem.objects.get(pk=pk, cart__user=request.user)
                 item.delete()
@@ -55,10 +57,84 @@ class CartAPIView(APIView):
             
             cart = Cart.objects.get(user=request.user)
             return Response(CartSerializer(cart).data)
-        else:
+        else:        
             cart = Cart.objects.get(user=request.user)
             cart.items.all().delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class CheckoutAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        
+        try:
+            cart = Cart.objects.get(user=request.user)
+            if not cart.items.exists():
+                 return Response({"error": "Кошик порожній"}, status=status.HTTP_400_BAD_REQUEST)
+        except Cart.DoesNotExist:
+            return Response({"error": "Кошик не знайдено"}, status=status.HTTP_404_NOT_FOUND)
+
+        email = request.data.get('email', request.user.email)
+        address = request.data.get('address', '')
+        total_price = 0
+        order_items_text = ""
+        order_number = str(uuid.uuid4())
+        order = Order.objects.create(
+            number=order_number,
+            orderprice=0 
+        )
+
+        for item in cart.items.all():
+            price_obj = item.product.prices.order_by('-pdate').first()
+            price = price_obj.pprice if price_obj else 0
+            
+            line_total = price * item.quantity
+            total_price += line_total
+
+            OrderProduct.objects.create(
+                order=order,
+                product=item.product,
+                qtty=item.quantity
+            )
+            
+            order_items_text += f"- {item.product.name} x {item.quantity} шт. = {line_total} грн.\n"
+
+        order.orderprice = total_price
+        order.save()
+
+        cart.items.all().delete()
+
+        subject = f"Підтвердження замовлення №{order_number}"
+        message = f"""
+Дякуємо за ваше замовлення!
+
+Номер замовлення: {order_number}
+Сума замовлення: {total_price} грн.
+
+Склад замовлення:
+{order_items_text}
+
+Адреса доставки: {address}
+
+Ми вже почали обробку вашого замовлення.
+        """
+        
+        try:
+            send_mail(
+                subject,
+                message,
+                'no-reply@webstore.com',
+                [email],
+                fail_silently=False,
+            )
+        except Exception as e:
+            print(f"Email sending failed: {e}")
+
+        return Response({
+            "message": "Оплата успішна. Замовлення створено.",
+            "order_number": order_number
+        }, status=status.HTTP_200_OK)
 
 
 class RegisterView(APIView):
