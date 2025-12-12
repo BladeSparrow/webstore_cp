@@ -6,7 +6,7 @@ from django.db.models import ProtectedError
 from django.core.mail import send_mail
 import uuid
 
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticated, AllowAny, IsAuthenticatedOrReadOnly
 from .models import Category, Manufacturer, Product, Cart, CartItem, Order, OrderProduct, Price
 from .serializers import (
     CategorySerializer, ManufacturerSerializer, ProductSerializer, UserSerializer,
@@ -67,7 +67,7 @@ class CheckoutAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        
+
         try:
             cart = Cart.objects.get(user=request.user)
             if not cart.items.exists():
@@ -236,6 +236,8 @@ class ManufacturerDetailAPIView(APIView):
 
 
 class ProductListCreateAPIView(APIView):
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
     def get(self, request):
         products = Product.objects.all()
         serializer = ProductSerializer(products, many=True)
@@ -249,6 +251,8 @@ class ProductListCreateAPIView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class ProductDetailAPIView(APIView):
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
     def get_object(self, pk):
         try:
             return Product.objects.get(pk=pk)

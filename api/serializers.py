@@ -55,7 +55,7 @@ class CartItemSerializer(serializers.ModelSerializer):
     product_id = serializers.PrimaryKeyRelatedField(
         queryset=Product.objects.all(), source='product', write_only=True
     )
-    price = serializers.DecimalField(max_digits=10, decimal_places=2, source='product.prices.first.pprice', read_only=True) # Simplification: taking first price. In real app logic is complex.
+    price = serializers.DecimalField(max_digits=10, decimal_places=2, source='product.prices.first.pprice', read_only=True) 
 
     class Meta:
         model = CartItem
