@@ -74,3 +74,11 @@ class CartItem(models.Model):
 
     def __str__(self):
         return f"{self.quantity} x {self.product.name} (в кошику {self.cart.user.username})"
+
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
+    telegram_id = models.CharField(max_length=100, unique=True, verbose_name="Telegram ID")
+
+    def __str__(self):
+        return f"Profile for {self.user.username} (TG: {self.telegram_id})"

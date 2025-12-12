@@ -63,6 +63,8 @@ class CartAPIView(APIView):
             return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+from .telegram_utils import send_telegram_message
+
 class CheckoutAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -75,7 +77,6 @@ class CheckoutAPIView(APIView):
         except Cart.DoesNotExist:
             return Response({"error": "Кошик не знайдено"}, status=status.HTTP_404_NOT_FOUND)
 
-        email = request.data.get('email', request.user.email)
         address = request.data.get('address', '')
         total_price = 0
         order_items_text = ""
@@ -105,7 +106,6 @@ class CheckoutAPIView(APIView):
 
         cart.items.all().delete()
 
-        subject = f"Підтвердження замовлення №{order_number}"
         message = f"""
 Дякуємо за ваше замовлення!
 
@@ -121,15 +121,12 @@ class CheckoutAPIView(APIView):
         """
         
         try:
-            send_mail(
-                subject,
-                message,
-                'no-reply@webstore.com',
-                [email],
-                fail_silently=False,
-            )
+            if hasattr(request.user, 'profile') and request.user.profile.telegram_id:
+                send_telegram_message(request.user.profile.telegram_id, message)
+            else:
+                print("User has no profile or telegram_id linked.")
         except Exception as e:
-            print(f"Email sending failed: {e}")
+            print(f"Telegram sending failed: {e}")
 
         return Response({
             "message": "Оплата успішна. Замовлення створено.",

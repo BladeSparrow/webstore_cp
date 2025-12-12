@@ -3,22 +3,23 @@ from api.models import Category, Manufacturer, Product, Price
 from datetime import date
 
 class Command(BaseCommand):
-    
+    help = 'Populates the database with sample data'
 
     def handle(self, *args, **options):
         self.stdout.write('Populating database...')
 
-
+        # Categories
         cat_elec, _ = Category.objects.get_or_create(code="ELEC", name="Electronics", defaults={"description": "Gadgets and devices"})
         cat_cloth, _ = Category.objects.get_or_create(code="CLOTH", name="Clothing", defaults={"description": "Apparel"})
         cat_books, _ = Category.objects.get_or_create(code="BOOK", name="Books", defaults={"description": "Reads"})
 
+        # Manufacturers
         man_apple, _ = Manufacturer.objects.get_or_create(code="APPLE", name="Apple Inc")
         man_samsung, _ = Manufacturer.objects.get_or_create(code="SAMSUNG", name="Samsung Electronics")
         man_nike, _ = Manufacturer.objects.get_or_create(code="NIKE", name="Nike")
         man_pub, _ = Manufacturer.objects.get_or_create(code="PUB", name="Publisher Inc")
 
-
+        # Products & Prices
         products_data = [
             {
                 "code": "IPHONE13",
@@ -65,6 +66,7 @@ class Command(BaseCommand):
                 }
             )
             
+            # Create price if product was created or no price exists
             if not product.prices.exists():
                 Price.objects.create(
                     product=product,

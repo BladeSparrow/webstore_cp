@@ -7,7 +7,7 @@ const Auth = () => {
     const [formData, setFormData] = useState({
         username: '',
         password: '',
-        email: '',
+        telegram_id: '',
         first_name: '',
         last_name: ''
     });
@@ -26,6 +26,7 @@ const Auth = () => {
         setError('');
         try {
             if (isLogin) {
+                // ... login logic remains same ...
                 const response = await api.post('auth/login/', {
                     username: formData.username,
                     password: formData.password
@@ -38,10 +39,9 @@ const Auth = () => {
                 let syncErrors = 0;
 
                 if (guestCart.length > 0) {
-                    // Start sync
+                    // ... sync logic remains same ...
                     for (const item of guestCart) {
                         try {
-                            // Ensure header is set for these requests specifically
                             const config = {
                                 headers: { Authorization: `Bearer ${response.data.access}` }
                             };
@@ -52,17 +52,11 @@ const Auth = () => {
                         } catch (e) {
                             console.error("Failed to sync item", item, e);
                             syncErrors++;
-                            // Capture first error for debugging
-                            if (syncErrors === 1) {
-                                alert(`Sync error for ${item.product.name}: ${JSON.stringify(e.response?.data || e.message)}`);
-                            }
                         }
                     }
 
                     if (syncErrors === 0) {
                         localStorage.removeItem('guest_cart');
-                    } else {
-                        alert(`Warning: ${syncErrors} items failed to sync to your account. They remain in guest cart.`);
                     }
                 }
 
@@ -73,7 +67,8 @@ const Auth = () => {
                 setIsLogin(true);
             }
         } catch (err) {
-            setError("Authentication failed. Check credentials.");
+            console.error(err);
+            setError("Authentication failed. Check credentials or Telegram ID uniqueness.");
         }
     };
 
@@ -97,7 +92,7 @@ const Auth = () => {
                 />
                 {!isLogin && (
                     <>
-                        <input name="email" placeholder="Email" onChange={handleChange} />
+                        <input name="telegram_id" placeholder="Telegram ID (e.g. 123456789)" onChange={handleChange} required />
                         <input name="first_name" placeholder="First Name" onChange={handleChange} />
                         <input name="last_name" placeholder="Last Name" onChange={handleChange} />
                     </>
