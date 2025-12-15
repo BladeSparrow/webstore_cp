@@ -3,7 +3,7 @@ from django.core.cache import cache
 
 EXCHANGE_API_URL = "https://v6.exchangerate-api.com/v6/f356d2eb621b815d1d72c4f4/latest/USD"
 CACHE_KEY = 'usd_uah_rate'
-CACHE_TIMEOUT = 3600  # 1 hour
+CACHE_TIMEOUT = 3600  
 
 def get_usd_to_uah_rate():
     rate = cache.get(CACHE_KEY)

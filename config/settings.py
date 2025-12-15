@@ -38,10 +38,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    # My apps
     'api.apps.ApiConfig',
 
-    # External library
     'rest_framework',
     'rest_framework_simplejwt',
     'corsheaders',    

@@ -33,21 +33,26 @@ class ProductSerializer(serializers.ModelSerializer):
                 return round(float(price_uah) / rate, 2)
         return None
 
+from .models import Category, Manufacturer, Product, Cart, CartItem, Profile
+
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
+    telegram_id = serializers.CharField(write_only=True)
 
     class Meta:
         model = User
-        fields = ('username', 'password', 'email', 'first_name', 'last_name')
+        fields = ('username', 'password', 'first_name', 'last_name', 'telegram_id')
 
     def create(self, validated_data):
+        telegram_id = validated_data.pop('telegram_id')
         user = User.objects.create_user(
             username=validated_data['username'],
             password=validated_data['password'],
-            email=validated_data.get('email', ''),
+            email='', 
             first_name=validated_data.get('first_name', ''),
             last_name=validated_data.get('last_name', '')
         )
+        Profile.objects.create(user=user, telegram_id=telegram_id)
         return user
 
 class CartItemSerializer(serializers.ModelSerializer):

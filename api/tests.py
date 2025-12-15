@@ -63,7 +63,7 @@ class CartAPITests(APITestCase):
         }
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        
+            
         cart = Cart.objects.get(user=self.user)
         self.assertEqual(cart.items.count(), 1)
         self.assertEqual(cart.items.first().quantity, 2)
