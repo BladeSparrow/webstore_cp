@@ -1,8 +1,8 @@
 from telegram import Bot
 from telegram.error import TelegramError
+from tokens import BOT_TOKEN_hide as BOT_TOKEN
 
 
-BOT_TOKEN = "8317069028:AAHDlQZ2uqvJZWovw4kPo2zTIZA0K0_DT48"
 
 async def send_telegram_message_async(chat_id, message):
 
