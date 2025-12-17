@@ -49,10 +49,18 @@
     gap: 1rem;
 }
 
-input, textarea {
+.auth-container form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+input, textarea, select {
     padding: 0.8rem;
     border: 1px solid #ddd;
     border-radius: 4px;
+    font-size: 1rem;
+    font-family: inherit;
 }
 
 button {

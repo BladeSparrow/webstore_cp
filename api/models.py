@@ -78,7 +78,7 @@ class CartItem(models.Model):
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
-    telegram_id = models.CharField(max_length=100, unique=True, verbose_name="Telegram ID")
+    is_manager = models.BooleanField(default=False, verbose_name="Менеджер")
 
     def __str__(self):
-        return f"Profile for {self.user.username} (TG: {self.telegram_id})"
+        return f"Profile for {self.user.username} (Manager: {self.is_manager})"

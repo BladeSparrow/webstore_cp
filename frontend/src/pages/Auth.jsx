@@ -7,7 +7,7 @@ const Auth = () => {
     const [formData, setFormData] = useState({
         username: '',
         password: '',
-        telegram_id: '',
+        email: '',
         first_name: '',
         last_name: ''
     });
@@ -21,54 +21,74 @@ const Auth = () => {
         });
     };
 
+    const processLoginResponse = async (response) => {
+        if (response.data.access) {
+            localStorage.setItem('access_token', response.data.access);
+            localStorage.setItem('refresh_token', response.data.refresh);
+
+            // Sync Guest Cart
+            const guestCart = JSON.parse(localStorage.getItem('guest_cart') || "[]");
+            let syncErrors = 0;
+
+            if (guestCart.length > 0) {
+                for (const item of guestCart) {
+                    try {
+                        const config = {
+                            headers: { Authorization: `Bearer ${response.data.access}` }
+                        };
+                        await api.post('cart/', {
+                            product_id: item.product.id,
+                            quantity: item.quantity
+                        }, config);
+                    } catch (e) {
+                        console.error("Failed to sync item", item, e);
+                        syncErrors++;
+                    }
+                }
+
+                if (syncErrors === 0) {
+                    localStorage.removeItem('guest_cart');
+                }
+            }
+
+            // Fetch user details to check manager status
+            try {
+                const meRes = await api.get('auth/me/', {
+                    headers: { Authorization: `Bearer ${response.data.access}` }
+                });
+                localStorage.setItem('is_manager', meRes.data.is_manager);
+                window.dispatchEvent(new Event("storage"));
+            } catch (e) {
+                console.error("Failed to fetch user info", e);
+            }
+
+            navigate('/');
+            window.location.reload();
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
         try {
             if (isLogin) {
-                // ... login logic remains same ...
                 const response = await api.post('auth/login/', {
                     username: formData.username,
                     password: formData.password
                 });
-                localStorage.setItem('access_token', response.data.access);
-                localStorage.setItem('refresh_token', response.data.refresh);
-
-                // Sync Guest Cart
-                const guestCart = JSON.parse(localStorage.getItem('guest_cart') || "[]");
-                let syncErrors = 0;
-
-                if (guestCart.length > 0) {
-                    // ... sync logic remains same ...
-                    for (const item of guestCart) {
-                        try {
-                            const config = {
-                                headers: { Authorization: `Bearer ${response.data.access}` }
-                            };
-                            await api.post('cart/', {
-                                product_id: item.product.id,
-                                quantity: item.quantity
-                            }, config);
-                        } catch (e) {
-                            console.error("Failed to sync item", item, e);
-                            syncErrors++;
-                        }
-                    }
-
-                    if (syncErrors === 0) {
-                        localStorage.removeItem('guest_cart');
-                    }
-                }
-
-                navigate('/');
+                await processLoginResponse(response);
             } else {
                 await api.post('auth/register/', formData);
-                alert("Registration successful! Please login.");
-                setIsLogin(true);
+                // Auto-login after registration
+                const loginResponse = await api.post('auth/login/', {
+                    username: formData.username,
+                    password: formData.password
+                });
+                await processLoginResponse(loginResponse);
             }
         } catch (err) {
             console.error(err);
-            setError("Authentication failed. Check credentials or Telegram ID uniqueness.");
+            setError("Authentication failed. Check credentials.");
         }
     };
 
@@ -92,7 +112,8 @@ const Auth = () => {
                 />
                 {!isLogin && (
                     <>
-                        <input name="telegram_id" placeholder="Telegram ID (e.g. 123456789)" onChange={handleChange} required />
+
+                        <input name="email" type="email" placeholder="Email" onChange={handleChange} required />
                         <input name="first_name" placeholder="First Name" onChange={handleChange} />
                         <input name="last_name" placeholder="Last Name" onChange={handleChange} />
                     </>

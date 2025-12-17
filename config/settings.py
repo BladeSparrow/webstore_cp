@@ -11,8 +11,6 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
-from tokens import SECRET_KEY_hide 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
@@ -20,7 +18,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = SECRET_KEY_hide
+SECRET_KEY = 'django-insecure-dummy-key-for-development'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
@@ -145,4 +143,11 @@ SIMPLE_JWT = {
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
 }
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_PORT = 2525
+DEFAULT_FROM_EMAIL = 'no-reply@localhost'
+OWNER_EMAIL = 'owner@webstore.com'
+
+EMAIL_HOST = 'sandbox.smtp.mailtrap.io'
+EMAIL_HOST_USER = '1752c119eb709f'
+EMAIL_HOST_PASSWORD = '5a7aafc5df8bd2'

@@ -45,3 +45,12 @@ class PriceAdmin(admin.ModelAdmin):
     list_display = ('product', 'pdate', 'pprice', 'qtty')
     list_filter = ('pdate',)
     search_fields = ('product__name',)
+
+
+from .models import Profile
+
+@admin.register(Profile)
+class ProfileAdmin(admin.ModelAdmin):
+    list_display = ('user', 'is_manager')
+    list_editable = ('is_manager',)
+

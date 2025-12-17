@@ -13,13 +13,29 @@ class ManufacturerSerializer(serializers.ModelSerializer):
         model = Manufacturer
         fields = '__all__'
 
+from .models import Category, Manufacturer, Product, Cart, CartItem, Price
+from datetime import date
+
 class ProductSerializer(serializers.ModelSerializer):
     price_uah = serializers.SerializerMethodField()
     price_usd = serializers.SerializerMethodField()
+    price = serializers.DecimalField(max_digits=10, decimal_places=2, write_only=True, required=False)
 
     class Meta:
         model = Product
         fields = '__all__'
+
+    def create(self, validated_data):
+        price_value = validated_data.pop('price', None)
+        product = Product.objects.create(**validated_data)
+        if price_value is not None:
+            Price.objects.create(
+                product=product,
+                pdate=date.today(),
+                pprice=price_value,
+                qtty=0  
+            )
+        return product
 
     def get_price_uah(self, obj):
         price = obj.prices.order_by('-pdate').first()
@@ -37,22 +53,21 @@ from .models import Category, Manufacturer, Product, Cart, CartItem, Profile
 
 class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
-    telegram_id = serializers.CharField(write_only=True)
+
 
     class Meta:
         model = User
-        fields = ('username', 'password', 'first_name', 'last_name', 'telegram_id')
+        fields = ('username', 'password', 'first_name', 'last_name', 'email')
 
     def create(self, validated_data):
-        telegram_id = validated_data.pop('telegram_id')
         user = User.objects.create_user(
             username=validated_data['username'],
             password=validated_data['password'],
-            email='', 
+            email=validated_data.get('email', ''), 
             first_name=validated_data.get('first_name', ''),
             last_name=validated_data.get('last_name', '')
         )
-        Profile.objects.create(user=user, telegram_id=telegram_id)
+        Profile.objects.create(user=user)
         return user
 
 class CartItemSerializer(serializers.ModelSerializer):

@@ -54,6 +54,19 @@ const ProductList = () => {
         }
     };
 
+    const handleDelete = async (id) => {
+        if (window.confirm("Are you sure you want to delete this product?")) {
+            try {
+                await api.delete(`products/${id}/`);
+                setProducts(products.filter(p => p.id !== id));
+            } catch (err) {
+                alert("Failed to delete product");
+            }
+        }
+    };
+
+    const isManager = localStorage.getItem('is_manager') === 'true';
+
     if (loading) return <div>Loading...</div>;
     if (error) return <div>{error}</div>;
 
@@ -69,6 +82,11 @@ const ProductList = () => {
                             {p.price_uah} UAH / {p.price_usd} USD
                         </p>
                         <button onClick={() => addToCart(p)}>Add to Cart</button>
+                        {isManager && (
+                            <button onClick={() => handleDelete(p.id)} style={{ backgroundColor: 'red', marginLeft: '10px' }}>
+                                Delete
+                            </button>
+                        )}
                     </div>
                 ))}
             </div>

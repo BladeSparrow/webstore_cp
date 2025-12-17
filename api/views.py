@@ -4,6 +4,7 @@ from rest_framework import status
 from django.http import Http404
 from django.db.models import ProtectedError
 from django.core.mail import send_mail
+from django.conf import settings
 import uuid
 
 from rest_framework.permissions import IsAuthenticated, AllowAny, IsAuthenticatedOrReadOnly
@@ -63,7 +64,6 @@ class CartAPIView(APIView):
             return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-from .telegram_utils import send_telegram_message
 
 class CheckoutAPIView(APIView):
     permission_classes = [IsAuthenticated]
@@ -121,12 +121,47 @@ class CheckoutAPIView(APIView):
         """
         
         try:
-            if hasattr(request.user, 'profile') and request.user.profile.telegram_id:
-                send_telegram_message(request.user.profile.telegram_id, message)
+            recipient_email = request.data.get('email')
+            if not recipient_email and request.user.email:
+                recipient_email = request.user.email
+
+            if recipient_email:
+                send_mail(
+                    subject=f"Нове замовлення {order_number}",
+                    message=message,
+                    from_email=None, 
+                    recipient_list=[recipient_email],
+                    fail_silently=False,
+                )
             else:
-                print("User has no profile or telegram_id linked.")
+                print("No email provided for order confirmation.")
         except Exception as e:
-            print(f"Telegram sending failed: {e}")
+            print(f"Email sending failed: {e}")
+
+        try:
+            owner_email = getattr(settings, 'OWNER_EMAIL', None)
+            if owner_email:
+                owner_message = f"""
+Нове замовлення #{order_number}!
+
+Покупець: {request.user.username} (ID: {request.user.id})
+Email покупця: {recipient_email or 'Не вказано'}
+Сума: {total_price} грн.
+
+Деталі замовлення:
+{order_items_text}
+
+Адреса доставки: {address}
+                """
+                send_mail(
+                    subject=f"New Order Alert: {order_number}",
+                    message=owner_message,
+                    from_email=None,
+                    recipient_list=[owner_email],
+                    fail_silently=False,
+                )
+        except Exception as e:
+            print(f"Owner notification failed: {e}")
 
         return Response({
             "message": "Оплата успішна. Замовлення створено.",
@@ -144,8 +179,29 @@ class RegisterView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class UserMeAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        is_manager = False
+        if hasattr(user, 'profile'):
+            is_manager = user.profile.is_manager
+            
+        return Response({
+            "id": user.id,
+            "username": user.username,
+            "is_staff": user.is_staff,
+            "is_manager": is_manager
+        })
+
 
 class CategoryListCreateAPIView(APIView):
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return [AllowAny()]
+        return [IsAuthenticatedOrReadOnly()]
+
     def get(self, request):
         categories = Category.objects.all()
         serializer = CategorySerializer(categories, many=True)
@@ -189,6 +245,11 @@ class CategoryDetailAPIView(APIView):
 
 
 class ManufacturerListCreateAPIView(APIView):
+    def get_permissions(self):
+        if self.request.method == 'GET':
+            return [AllowAny()]
+        return [IsAuthenticatedOrReadOnly()]
+
     def get(self, request):
         manufacturers = Manufacturer.objects.all()
         serializer = ManufacturerSerializer(manufacturers, many=True)
@@ -232,8 +293,13 @@ class ManufacturerDetailAPIView(APIView):
 
 
 
+from .permissions import IsManager
+
 class ProductListCreateAPIView(APIView):
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    def get_permissions(self):
+        if self.request.method == 'POST':
+             return [IsAuthenticated(), IsManager()]
+        return [IsAuthenticatedOrReadOnly()]
 
     def get(self, request):
         products = Product.objects.all()
@@ -248,7 +314,10 @@ class ProductListCreateAPIView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class ProductDetailAPIView(APIView):
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    def get_permissions(self):
+        if self.request.method in ['PUT', 'DELETE']:
+             return [IsAuthenticated(), IsManager()]
+        return [IsAuthenticatedOrReadOnly()]
 
     def get_object(self, pk):
         try:
@@ -279,6 +348,8 @@ class ProductDetailAPIView(APIView):
 
 
 class ProductListByCategoryAPIView(APIView):
+    permission_classes = [AllowAny]
+
     def get(self, request, category_id):
         products = Product.objects.filter(category__id=category_id)
         if not products.exists():
@@ -287,6 +358,8 @@ class ProductListByCategoryAPIView(APIView):
         return Response(serializer.data)
 
 class ProductListByManufacturerAPIView(APIView):
+    permission_classes = [AllowAny]
+
     def get(self, request, manufacturer_id):
         products = Product.objects.filter(manufacturer__id=manufacturer_id)
         if not products.exists():
